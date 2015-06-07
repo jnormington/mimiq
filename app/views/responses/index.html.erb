@@ -1,0 +1,31 @@
+<div class="row">
+  <div class="container-fluid">
+    <div class="col l12 m12">
+      <br/><h3 class="orange-text">Responses</h3>
+      <%= link_to 'Create Response', new_response_path, class: 'btn blue white-text' %>
+      <%= render 'layouts/notice', :obj => @response %>
+      <table class="striped">
+        <thead>
+          <tr>
+            <th>Request Type</th>
+            <th>Response Type</th>
+            <th>Request By</th>
+            <th>Content</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @responses.each do |response| %>
+            <tr>
+              <td><%= response.request_type %></td>
+              <td><%= response.response_type %></td>
+              <td><%= response.request_by %></td>
+              <td><%= response.content %></td>
+              <td><%= link_to 'Edit', edit_response_path(response) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

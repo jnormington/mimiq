@@ -23,3 +23,15 @@ Card.find_or_create_by(title: 'Server Error (500)') do |card|
   card.description = "The url allows you to do a GET request. It always responds with a 500 http status with the public/500.html page"
   card.link = "/scenario/server_error"
 end
+
+Card.find_or_create_by(title: 'GET Request') do |card|
+  card.caption = 'Tests server responding with certain content'
+  card.description = "The url allows you to do a GET request. Its responds with your content you have configured. It can be JSON/XML or just plain old html"
+  card.link = "/scenario/get"
+end
+
+Card.find_or_create_by(title: 'POST Request') do |card|
+  card.caption = 'Tests server responding to your POST request'
+  card.description = "The url allows you to do a POST request and it respond with your content you have configured. It can be JSON/XML or just plain old html"
+  card.link = "/scenario/post"
+end

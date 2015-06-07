@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150606225501) do
+ActiveRecord::Schema.define(version: 20150607181324) do
 
   create_table "cards", force: :cascade do |t|
     t.string   "title"
@@ -20,6 +20,15 @@ ActiveRecord::Schema.define(version: 20150606225501) do
     t.string   "link"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
+  end
+
+  create_table "responses", force: :cascade do |t|
+    t.string   "request_type"
+    t.string   "request_by"
+    t.string   "response_type"
+    t.text     "content"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
   end
 
 end
