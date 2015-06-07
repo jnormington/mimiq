@@ -1,0 +1,92 @@
+<div class="row">
+  <div class="container-fluid">
+    <br/><h3 class="center">Welcome</h3>
+
+    <div class="col l4 m10 offset-m1">
+      <div class="container-fluid card blue z-depth-2">
+        <div class="cover z-depth-1">
+          <div class="col l9 m10 offset-m1">
+            <div class="filter blue">
+              <div class="card-content white-text">
+                <p class="card-title">Welcome</p>
+                <p>What scenario do you require</p>
+              </div>
+              <div class="card-content white-text">
+                View the next few cards to see what urls are available what
+                you can do to help test certain scenarios
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col l4 m10 offset-m1">
+      <div class="container-fluid card blue z-depth-2">
+        <div class="cover z-depth-1">
+          <div class="col l12 m10 offset-m1">
+            <div class="filter blue">
+              <div class="card-content white-text">
+                <p class="card-title">How can this help</p>
+                <p>Helps test how users are handled</p>
+              </div>
+              <div class="card-content white-text">
+                This application has several URLs for which allows you to mimic scenarios;
+                all you need to do is point the configuration in your application to the url
+                for the scenario you need to test.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col l4 m10 offset-m1">
+      <div class="container-fluid card blue z-depth-2">
+        <div class="cover z-depth-1">
+          <div class="col l11 m10 offset-m1">
+            <div class="filter blue">
+              <div class="card-content white-text">
+                <p class="card-title">Something missing</p>
+                <p>Request it <b><a class="white-text" href="https://github.com/jnormington/mimiq">here</a></b></p>
+              </div>
+              <div class="card-content white-text">
+                Having trouble and need help? Request it <b><a class="white-text" href="https://github.com/jnormington/mimiq">here</a></b></p>
+                Either fork the project as you feel fit - and create a pull request for making it upstream.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="container-fluid">
+    <br/><br/><h3 class="center"> Available Pages </h3>
+  <% @cards.each do |card| %>
+    <div class="col l4 m10 offset-m1">
+      <div class="container-fluid card blue z-depth-2">
+        <div class="cover z-depth-1">
+          <div class="filter blue">
+           <div class="card-content white-text">
+              <p class="card-title"><%= card.title %></p>
+              <p><%= card.caption %> <b><a class="white-text" href="https://github.com/jnormington/mimiq">here</a></b></p>
+            </div>
+            <div class="card-content white-text">
+              <%= card.description %>
+            </div>
+            <div class="card-action blue darken-2 white-text">
+              <p class="left" style="margin-top: 6px;"><b>URL: </b> <%= card.link %></p>
+              <div class="center">
+                <%= link_to card.title, card.link , class: 'blue white-text btn' %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+</div>
