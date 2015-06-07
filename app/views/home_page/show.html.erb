@@ -1,6 +1,6 @@
 <div class="row">
   <div class="container-fluid">
-    <br/><h3 class="center">Welcome</h3>
+    <br/><h3 class="center orange-text">Welcome to Mimiq</h3>
 
     <div class="col l4 m10 offset-m1">
       <div class="container-fluid card blue z-depth-2">
@@ -62,31 +62,4 @@
   </div>
 </div>
 
-<div class="row">
-  <div class="container-fluid">
-    <br/><br/><h3 class="center"> Available Pages </h3>
-  <% @cards.each do |card| %>
-    <div class="col l4 m10 offset-m1">
-      <div class="container-fluid card blue z-depth-2">
-        <div class="cover z-depth-1">
-          <div class="filter blue">
-           <div class="card-content white-text">
-              <p class="card-title"><%= card.title %></p>
-              <p><%= card.caption %> <b><a class="white-text" href="https://github.com/jnormington/mimiq">here</a></b></p>
-            </div>
-            <div class="card-content white-text">
-              <%= card.description %>
-            </div>
-            <div class="card-action blue darken-2 white-text">
-              <p class="left" style="margin-top: 6px;"><b>URL: </b> <%= card.link %></p>
-              <div class="center">
-                <%= link_to card.title, card.link , class: 'blue white-text btn' %>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-<% end %>
-</div>
+<%= render 'layouts/cards' %>

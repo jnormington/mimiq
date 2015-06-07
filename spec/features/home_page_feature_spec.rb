@@ -4,7 +4,8 @@ describe 'Viewing home page', type: :feature do
   describe "without any cards" do
     it "displays the home page when no cards exists" do
       visit root_path
-      expect(page).to have_text 'Welcome'
+      expect(page).to have_text 'Welcome to Mimiq'
+      expect(page).to have_text 'Available Pages'
     end
   end
 
