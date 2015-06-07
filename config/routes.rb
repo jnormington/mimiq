@@ -3,6 +3,13 @@ Rails.application.routes.draw do
 
   get 'home_page/show'
 
+  resource :scenario, only: [:index] do
+    get '/'             => 'scenario#index'
+    get 'timeout'      => 'scenario#timeout'
+    get 'not_found'    => 'scenario#not_found'
+    get 'server_error' => 'scenario#server_error'
+  end
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
