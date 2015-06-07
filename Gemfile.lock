@@ -44,6 +44,7 @@ GEM
       rack (>= 1.0.0)
       rack-test (>= 0.5.4)
       xpath (~> 2.0)
+    database_cleaner (1.4.1)
     diff-lcs (1.2.5)
     erubis (2.7.0)
     execjs (2.5.2)
@@ -139,6 +140,7 @@ PLATFORMS
 
 DEPENDENCIES
   capybara
+  database_cleaner (~> 1.4.1)
   materialize-sass
   rails (= 4.2.1)
   rspec-rails (~> 3.0)
