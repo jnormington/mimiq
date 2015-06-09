@@ -1,0 +1,21 @@
+<div class="row">
+  <% if flash[:notice] %>
+    <div class="col l6 offset-l3 card green lighten-2 white-text center">
+      <h5><%= flash[:notice] %></h5>
+    </div>
+  <% elsif flash[:error] %>
+  <div class="col l12 m12 card red lighten-2 white-text">
+    <h5 class=""><%= flash[:error] %></h5>
+  </div>
+  <% elsif obj && obj.try(:errors).try(:any?) %>
+
+    <div class="col l12 m12 card red lighten-2 white-text">
+      <h5><%= pluralize(obj.errors.count, "error") %> occurred please review below </h5>
+      <ul>
+        <% obj.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+</div>

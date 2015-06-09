@@ -1,0 +1,30 @@
+<div class="row" style="padding:20px;">
+  <div class="col l6 m10 black-text grey lighten-4" style="padding:20px;">
+    <h3 class="orange-text"><%= title %></h3>
+    <%= render 'layouts/notice', :obj => @response %>
+    <%= form_for(@response) do |f| %>
+      <div>
+        <div>
+          <div><%= f.label :request_by %></div>
+          <%= f.text_field :request_by %>
+        </div>
+        <div>
+          <div><%= f.label :request_type %></div>
+          <%= f.select :request_type, options_for_select(@request_types, @response.request_type) %>
+        </div>
+        <div class="form-spacer">
+          <div><%= f.label :response_type %></div>
+          <%= f.select :response_type, options_for_select(@response_types, @response.response_type) %>
+        </div>
+        <div class="form-spacer">
+          <div><%= f.label :content %></div>
+          <%= f.text_area(:content, style: 'height: 350px;') %>
+        </div>
+      </div>
+      <div class="form-spacer">
+        <%= f.submit "#{save_btn}", class: 'btn blue white-text' %>
+        <%= link_to 'Back', responses_path, class: 'btn orange darken-4 white-text' %>
+      </div>
+    <% end %>
+  </div>
+</div>
