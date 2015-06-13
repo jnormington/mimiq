@@ -1,3 +1,5 @@
+require 'rails_helper'
+
 describe 'Viewing scenario index page', type: :feature do
   describe "without any cards" do
     it "displays the scenario index page when no cards exists" do
@@ -47,6 +49,48 @@ describe 'Viewing scenario custom show page', type: :feature do
       click_link 'Go home'
       expect(page).to have_text 'Welcome to Mimiq'
     end
+  end
+end
+
+describe '#get scenario' do
+  let!(:response_a) do
+    Response.create!(
+      request_type: 'GET',
+      request_by: 'pst1',
+      response_type: 'JSON',
+      content: '{postcodes: []}'
+    )
+  end
+
+  let!(:response_b) do
+    Response.create!(
+      request_type: 'GET',
+      request_by: 'pst_err',
+      response_type: '500',
+      content: '{postcodes: []}'
+    )
+  end
+
+  it 'returns the content of response when request_by provided' do
+    visit get_scenario_path('pst1')
+
+    expect(page.status_code).to eq 200
+    expect(page.source).to eq response_a.content
+    expect(page.response_headers["Content-Type"]).to include 'application/json'
+  end
+
+  it "returns a 404 page when no record can be found" do
+    visit get_scenario_path('blah')
+
+    expect(page.status_code).to eq 404
+    expect(page).to have_text "The page you were looking for doesn't exist (404)"
+  end
+
+  it "returns a 500 page when response states to return a 500" do
+    visit get_scenario_path('pst_err')
+
+    expect(page.status_code).to eq 500
+    expect(page).to have_text "We're sorry, but something went wrong (500)"
   end
 end
 
