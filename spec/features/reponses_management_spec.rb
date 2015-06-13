@@ -20,7 +20,6 @@ describe 'Responses', type: :feature do
   describe 'Creating'do
     let!(:response) {{ response_type: 'XML', content: 'some fake xml', request_type: 'GET', request_by: 'something' }}
     let(:response_a) {{response_type: 'XML',  content: 'some fake xml',    request_type: 'GET', request_by: '' }}
-    let(:response_b) {{response_type: 'JSON', content: '{some fake json}', request_type: 'GET', request_by: '' }}
 
     it 'creates successfully and redirects to index page' do
       visit_index_and_click_create_resource
@@ -45,20 +44,21 @@ describe 'Responses', type: :feature do
       expect { table_row_for('something') }.to raise_error(Capybara::ElementNotFound)
     end
 
-    it "displays errors when response input is invalid" do
+    it "displays errors when missing data" do
       visit_index_and_click_create_resource
       fill_in_response_form_with {}
 
-      expect(page).to have_text '1 error occurred'
+      expect(page).to have_text '2 errors occurred'
       expect(page).to have_text "Content can't be blank"
+      expect(page).to have_text "Request by can't be blank"
     end
 
     it "remembers my response_type and request_type selection when errors occur" do
       visit_index_and_click_create_resource
-      fill_in_response_form_with({request_type: 'POST', response_type: 'JSON'})
+      fill_in_response_form_with(request_type: 'POST', response_type: 'JSON')
 
-      fill_in_response_form_with({content: 'blah'})
-
+      fill_in_response_form_with(request_by: 'grey', content: 'blah')
+      puts page.html
       response = Response.last
 
       expect(response.request_type).to eq 'POST'
@@ -66,43 +66,17 @@ describe 'Responses', type: :feature do
     end
 
     ['GET', 'POST'].each do |request_type|
-      it "doesn't display an error when leaving request_by blank for #{request_type} and one exists for the other request_type" do
-        rt = ['GET', 'POST']
-        rt.delete(request_type)
-
-        response_a.merge!(request_type: rt.first)
-        response_b.merge!(request_type: request_type)
-
+      it "displays an error when leaving request_by blank" do
         visit_index_and_click_create_resource
         fill_in_response_form_with response_a
-
-        expect(page).to have_text success_create
-
-        visit_index_and_click_create_resource
-        fill_in_response_form_with response_b
-        expect(page).to have_text success_create
-      end
-
-
-      it "displays an error when leaving request_by blank and one already exists for #{request_type}" do
-        response_a.merge!(request_type: request_type)
-        response_b.merge!(request_type: request_type)
-
-        visit_index_and_click_create_resource
-        fill_in_response_form_with response_a
-
-        expect(page).to have_text success_create
-
-        visit_index_and_click_create_resource
-        fill_in_response_form_with response_b
 
         expect(page).to have_text '1 error occurred'
-        expect(page).to have_text "Request by has already been taken"
+        expect(page).to have_text "Request by can't be blank"
       end
     end
 
     describe 'Editing' do
-      let(:response_a)      {{ response_type: '500',  content: 'some json content', request_type: 'GET',  request_by: ''}}
+      let(:response_a)      {{ response_type: '500',  content: 'some json content', request_type: 'GET',  request_by: 'frog'}}
       let(:response)        {{ response_type: 'XML',  content: 'some fake xml',     request_type: 'GET',  request_by: 'bread' }}
       let(:edited_response) {{ response_type: 'JSON', content: 'some json',         request_type: 'POST', request_by: 'butter' }}
       let(:success_edit)    { 'Response successfully edited' }
@@ -125,7 +99,7 @@ describe 'Responses', type: :feature do
         expect(table_row_for('butter').text).to eq 'POST JSON butter some json Edit'
       end
 
-      it 'displays errors when removing content and request_by and it exists' do
+      it 'displays errors when removing content and request_by' do
         [response, response_a].each {|res| Response.create!(res) }
 
         visit responses_path
@@ -136,7 +110,7 @@ describe 'Responses', type: :feature do
 
         fill_in_response_form_with({content: '', request_by: ''}, 'Update')
         expect(page).to have_text '2 errors'
-        expect(page).to have_text 'Request by has already been taken'
+        expect(page).to have_text "Request by can't be blank"
         expect(page).to have_text "Content can't be blank"
       end
     end

@@ -4,6 +4,7 @@ describe Response, type: :model do
   it { expect(subject).to validate_presence_of :request_type }
   it { expect(subject).to validate_presence_of :response_type }
   it { expect(subject).to validate_presence_of :content }
+  it { expect(subject).to validate_presence_of :request_by }
 
   it { expect(subject).to validate_uniqueness_of(:request_by).scoped_to(:request_type) }
 
