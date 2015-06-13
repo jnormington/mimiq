@@ -94,3 +94,44 @@ describe '#get scenario' do
   end
 end
 
+describe '#post scenario' do
+  let!(:response_a) do
+    Response.create!(
+      request_type: 'POST',
+      request_by: 'bug',
+      response_type: '500',
+      content: 'frog'
+    )
+  end
+
+  let!(:response_b) do
+    Response.create!(
+      request_type: 'POST',
+      request_by: 't_rex',
+      response_type: 'XML',
+      content: '<xml></xml>'
+    )
+  end
+
+  it 'returns the content of response content when request_by is provided' do
+    page.driver.follow(:post, post_scenario_path('t_rex'), params: { :anything => "AAXZK" })
+
+    expect(page.status_code).to eq 200
+    expect(page.source).to eq response_b.content
+    expect(page.response_headers["Content-Type"]).to include 'application/xml'
+  end
+
+  it "returns a 404 page when no record can be found" do
+    page.driver.follow(:post, post_scenario_path('boo'), params: { :something => "AAXZK" })
+
+    expect(page.status_code).to eq 404
+    expect(page).to have_text "The page you were looking for doesn't exist (404)"
+  end
+
+  it "returns a 500 page when response states to return a 500" do
+    page.driver.follow(:post, post_scenario_path('bug'), params: {test: 't'})
+
+    expect(page.status_code).to eq 500
+    expect(page).to have_text "We're sorry, but something went wrong (500)"
+  end
+end
