@@ -8,10 +8,10 @@ As a QA Tester I am always testing with third party integration services such as
 
 The problem is not all web applications rescue the common scenarios adequately or another
 layer in the application expires else where - this app allows you to mimic these scenarios
-by altering the configuration of the application under test.
+by altering the configuration of the application under test to point to this web application
 
 Generally playing with the firewall, denying outgoing connections as well as altering
-directly on the server to watch the outcome worked well - but have recently found this
+code directly on the server to watch the outcome worked well - but I have recently found this
 not to be a great way so this trys to make it a little easier.
 
 
@@ -24,7 +24,7 @@ third party integrations - for which you can alter the configuration url for the
 It tries to provide the following;
 
  - timeout (configurable by param)
- - returning (custom|generic) files/json/xml
+ - returning (custom|generic) json/xml
  - 404'ing
  - 500'ing
  - GET request - with different configurable responses
@@ -40,4 +40,4 @@ It tries to provide the following;
 ###What it includes
 
   - Basic rails web application
-  - Ansible scripts for basic web server setup and deployment to digital ocean
+  - Ansible script for basic web server setup and deployment to digital ocean
