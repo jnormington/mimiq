@@ -17,6 +17,10 @@ class ScenarioController < ApplicationController
   end
 
   def get
-    ResponseHandler.new(self, action_name, params[:request_by]).resolve
+    ResponseHandler.new(self, (params[:from_action] ||= action_name), params[:request_by]).resolve
+  end
+
+  def post
+    redirect_to get_scenario_path(params[:request_by], from_action: 'post')
   end
 end
