@@ -19,7 +19,7 @@ class ResponseHandler
 
   private
   def find_response
-    Response.where(request_type: action).find_by(request_by: request_by)
+    Response.where(request_type: action.upcase).find_by(request_by: request_by.to_s)
   end
 
   def response
