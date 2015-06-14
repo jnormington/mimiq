@@ -1,0 +1,33 @@
+---
+
+# - name: 'Check pip is existing'
+
+# Check pip executable exists
+# Install dopy module
+# pip doesnt exist ask user to install and recommend if on osx either via
+#  - brew install pip (which install python)
+#  - or if python already installed then easy_install pip with sudo rights
+
+# Raise exception here if the user hasnt provided the extra vars over the command line
+
+# Once ssh-key created register that for use in the droplet creation
+
+# Check if the ssh key already exists if so then just use that one instead
+# ansible-playbook site.yml --extra-vars="DO_API_KEY=blah DO_CLIENT_ID=blue" -i hosts
+
+- name: 'Create local ssh private/public key'
+  hosts: 127.0.0.1
+  connection: local
+  tasks:
+   - name: Create key
+     shell: ssh-keygen -q -trsa -N '' -f ~/.ssh/mimiq_rsa
+   - name: Extract pub key contents
+     shell: cat ~/.ssh/mimiq_rsa.pub
+     register: key
+   - digital_ocean_sshkey: >
+      state=present
+      name=mimiq_rsa_key
+      ssh_pub_key="{{key}}"
+      client_id="{{DO_CLIENT_ID}}"
+      api_key="{{DO_API_KEY}}"
+
