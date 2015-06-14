@@ -1,4 +1,6 @@
 class ScenarioController < ApplicationController
+  before_action :load_response, only: [:get, :post]
+
   def index
     @cards = Card.all
   end
@@ -17,10 +19,27 @@ class ScenarioController < ApplicationController
   end
 
   def get
-    ResponseHandler.new(self, (params[:from_action] ||= action_name), params[:request_by]).resolve
+    sleep_time if params[:response_id].blank?
+    ResponseHandler.new(self, @response).resolve
   end
 
   def post
-    redirect_to get_scenario_path(params[:request_by], from_action: 'post')
+    sleep_time
+    redirect_to get_scenario_path(params[:request_by], response_id: @response.try(:id))
+  end
+
+  private
+
+  def load_response
+    @response =
+    if params[:response_id]
+      Response.find_by(id: params[:response_id])
+    else
+      Response.where(request_type: action_name.upcase).find_by(request_by: params[:request_by])
+    end
+  end
+
+  def sleep_time
+    sleep(@response.try(:wait_time).to_i)
   end
 end

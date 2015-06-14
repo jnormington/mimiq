@@ -71,6 +71,16 @@ describe '#get scenario' do
     )
   end
 
+  let!(:response_wait) do
+    Response.create!(
+      request_type: 'GET',
+      request_by: 'wait_e',
+      response_type: '422_JSON',
+      content: '{postcodes: []}',
+      wait_time: '3'
+    )
+  end
+
   it 'returns the content of response when request_by provided' do
     visit get_scenario_path('pst1')
 
@@ -91,6 +101,27 @@ describe '#get scenario' do
 
     expect(page.status_code).to eq 500
     expect(page).to have_text "We're sorry, but something went wrong (500)"
+  end
+
+  it 'waits for the specified time on the response' do
+    start_time = Time.now
+    visit get_scenario_path('wait_e')
+    finish_time = Time.now
+
+    expect(finish_time.to_i - start_time.to_i).to eq 3
+    expect(page.status_code).to eq 422
+    expect(page.source).to eq response_b.content
+    expect(page.response_headers["Content-Type"]).to include 'application/json'
+  end
+
+  it 'waits for 0 seconds when wait_time is nil' do
+    start_time = Time.now
+    visit get_scenario_path('pst1')
+    finish_time = Time.now
+
+    expect(finish_time.to_i - start_time.to_i).to eq 0
+    expect(page.source).to eq response_a.content
+    expect(page.response_headers["Content-Type"]).to include 'application/json'
   end
 end
 
@@ -120,6 +151,47 @@ describe '#post scenario' do
       response_type: '422_JSON',
       content: "{errors: ['email required']}"
     )
+  end
+
+  let!(:response_d) do
+    Response.create!(
+      request_type: 'GET',
+      request_by: 'free',
+      response_type: 'XML',
+      content: "{errors: ['email required']}",
+      wait_time: '4'
+    )
+  end
+
+  let!(:response_e) do
+    Response.create!(
+      request_type: 'POST',
+      request_by: 'free',
+      response_type: 'XML',
+      content: "{errors: ['email required']}",
+      wait_time: '2'
+    )
+  end
+
+  it 'waits for the specified time on the response when a matching GET response matches request_by' do
+    start_time = Time.now
+    page.driver.follow(:post, post_scenario_path('free'), params: { :anything => "AAXZK" })
+    finish_time = Time.now
+
+    expect(finish_time.to_i - start_time.to_i).to eq 2
+    expect(page.status_code).to eq 200
+    expect(page.source).to eq response_e.content
+    expect(page.response_headers["Content-Type"]).to include 'application/xml'
+  end
+
+  it 'waits for 0 seconds when wait_time is nil' do
+    start_time = Time.now
+    page.driver.follow(:post, post_scenario_path('bug'), params: { :anything => "AAXZK" })
+    finish_time = Time.now
+
+    expect(finish_time.to_i - start_time.to_i).to eq 0
+    expect(page.status_code).to eq 500
+    expect(page).to have_text "We're sorry, but something went wrong (500)"
   end
 
   it 'returns the content of response content when request_by is provided' do

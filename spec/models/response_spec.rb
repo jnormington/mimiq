@@ -7,6 +7,7 @@ describe Response, type: :model do
   it { expect(subject).to validate_presence_of :request_by }
 
   it { expect(subject).to validate_uniqueness_of(:request_by).scoped_to(:request_type) }
+  it { expect(subject).to validate_numericality_of(:wait_time).allow_nil }
 
   it { expect(subject).to ensure_length_of(:request_type).is_at_most(50) }
   it { expect(subject).to ensure_length_of(:response_type).is_at_most(50) }

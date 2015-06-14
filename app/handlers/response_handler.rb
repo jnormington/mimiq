@@ -1,11 +1,9 @@
 class ResponseHandler
-  attr_reader :controller, :action, :request_by
+  attr_reader :controller
 
-  def initialize(controller, action, request_by)
+  def initialize(controller, response)
     @controller = controller
-    @action = action
-    @request_by = request_by
-
+    @response = response
   end
 
   def resolve
@@ -17,16 +15,11 @@ class ResponseHandler
     end
   end
 
-  private
-
-  def find_response
-    Response.where(request_type: action.upcase).
-      find_by(request_by: request_by) || Response.new(response_type: '404')
-  end
-
   def response
-    @response ||= find_response
+    @response ||= Response.new(response_type: '404')
   end
+
+  private
 
   def respond_with_500
     controller.render file: 'public/500.html',  status: 500

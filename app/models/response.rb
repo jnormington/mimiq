@@ -5,6 +5,7 @@ class Response < ActiveRecord::Base
 
   validates_presence_of :request_type, :response_type, :content, :request_by
   validates_uniqueness_of :request_by, scope: :request_type
+  validates :wait_time, numericality: { only_integer: true, allow_nil: true }
 
   validates_length_of :request_type, :response_type, :request_by, maximum: 50
   validates_inclusion_of :response_type, in: TYPES

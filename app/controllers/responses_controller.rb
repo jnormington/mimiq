@@ -42,6 +42,6 @@ class ResponsesController < ApplicationController
   end
 
   def response_params
-    params.fetch(:response).permit(:response_type, :request_type, :content, :request_by)
+    params.fetch(:response).permit(:response_type, :request_type, :content, :request_by, :wait_time)
   end
 end
