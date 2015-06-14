@@ -58,7 +58,6 @@ describe 'Responses', type: :feature do
       fill_in_response_form_with(request_type: 'POST', response_type: 'JSON')
 
       fill_in_response_form_with(request_by: 'grey', content: 'blah')
-      puts page.html
       response = Response.last
 
       expect(response.request_type).to eq 'POST'

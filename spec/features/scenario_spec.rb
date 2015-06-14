@@ -113,12 +113,29 @@ describe '#post scenario' do
     )
   end
 
+  let!(:response_c) do
+    Response.create!(
+      request_type: 'POST',
+      request_by: 'error',
+      response_type: '422_JSON',
+      content: "{errors: ['email required']}"
+    )
+  end
+
   it 'returns the content of response content when request_by is provided' do
     page.driver.follow(:post, post_scenario_path('t_rex'), params: { :anything => "AAXZK" })
 
     expect(page.status_code).to eq 200
     expect(page.source).to eq response_b.content
     expect(page.response_headers["Content-Type"]).to include 'application/xml'
+  end
+
+  it 'returns the json content type and 422 http status' do
+    page.driver.follow(:post, post_scenario_path('error'), params: { :not_even_required => "ACZK" })
+
+    expect(page.status_code).to eq 422
+    expect(page.source).to eq response_c.content
+    expect(page.response_headers["Content-Type"]).to include 'application/json'
   end
 
   it "returns a 404 page when no record can be found" do
