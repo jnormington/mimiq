@@ -12,7 +12,7 @@ describe Response, type: :model do
   it { expect(subject).to ensure_length_of(:response_type).is_at_most(50) }
   it { expect(subject).to ensure_length_of(:request_by).is_at_most(50) }
 
-  it { expect(Response::TYPES).to eq ['XML', 'JSON', '500', '404'] }
+  it { expect(Response::TYPES).to eq %w(XML JSON 500 404 422_JSON 422_XML) }
   it { expect(subject).to validate_inclusion_of(:response_type).in_array(Response::TYPES)}
 
   it { expect(Response::REQUEST_TYPES).to eq ['GET', 'POST'] }

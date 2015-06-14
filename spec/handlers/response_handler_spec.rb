@@ -53,6 +53,20 @@ describe 'ResponseHandler' do
       content: '{postcode: AA1 1CU}')
     end
 
+    let(:response_422_json) do Response.new(
+      request_type: 'get',
+      response_type: '422_JSON',
+      request_by: 'green',
+      content: '{errors: []}')
+    end
+
+    let(:response_422_xml) do Response.new(
+      request_type: 'get',
+      response_type: '422_XML',
+      request_by: 'green',
+      content: '{errors: []}')
+    end
+
     it 'expects to render 500 status page' do
       allow(subject).to receive(:find_response) { response_500 }
       expect(subject.resolve).to eq({ file: "public/500.html",  status: 500, render: true })
@@ -81,8 +95,28 @@ describe 'ResponseHandler' do
       })
     end
 
+    it 'expects to render 422 with XML content_type' do
+      allow(subject).to receive(:find_response) { response_422_xml }
+      expect(subject.resolve).to eq({
+        body: response_422_xml.content,
+        content_type: 'application/xml',
+        status: 422,
+        render: true
+      })
+    end
+
+    it 'expects to render 422 with JSON content_type' do
+      allow(subject).to receive(:find_response) { response_422_json }
+      expect(subject.resolve).to eq({
+        body: response_422_json.content,
+        content_type: 'application/json',
+        status: 422,
+        render: true
+      })
+    end
+
     it 'expects to render 404 when record is not found' do
-      allow(subject).to receive(:find_response)
+      allow(subject).to receive(:find_response) { Response.new(response_type: '404') }
       expect(subject.resolve).to eq({ file: "public/404.html",  status: 404, render: true })
     end
   end

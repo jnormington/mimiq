@@ -1,6 +1,6 @@
 class Response < ActiveRecord::Base
 
-  TYPES = %w(XML JSON 500 404)
+  TYPES = %w(XML JSON 500 404 422_JSON 422_XML)
   REQUEST_TYPES = %w(GET POST)
 
   validates_presence_of :request_type, :response_type, :content, :request_by
