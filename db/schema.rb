@@ -27,6 +27,7 @@ ActiveRecord::Schema.define(version: 20150607181324) do
     t.string   "request_by"
     t.string   "response_type"
     t.text     "content"
+    t.integer  "wait_time"
     t.datetime "created_at",    null: false
     t.datetime "updated_at",    null: false
   end

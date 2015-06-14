@@ -18,7 +18,7 @@ describe 'Responses', type: :feature do
   end
 
   describe 'Creating'do
-    let!(:response) {{ response_type: 'XML', content: 'some fake xml', request_type: 'GET', request_by: 'something' }}
+    let!(:response) {{ response_type: 'XML', content: 'some fake xml', request_type: 'GET', request_by: 'something', wait_time: 20 }}
     let(:response_a) {{response_type: 'XML',  content: 'some fake xml',    request_type: 'GET', request_by: '' }}
 
     it 'creates successfully and redirects to index page' do
@@ -33,6 +33,7 @@ describe 'Responses', type: :feature do
       expect(row.text).to have_text 'XML'
       expect(row.text).to have_text 'GET'
       expect(row.text).to have_text 'something'
+      expect(row.text).to have_text '20'
     end
 
     it 'returns to the response index page and doesnt save' do
@@ -77,7 +78,7 @@ describe 'Responses', type: :feature do
     describe 'Editing' do
       let(:response_a)      {{ response_type: '500',  content: 'some json content', request_type: 'GET',  request_by: 'frog'}}
       let(:response)        {{ response_type: 'XML',  content: 'some fake xml',     request_type: 'GET',  request_by: 'bread' }}
-      let(:edited_response) {{ response_type: 'JSON', content: 'some json',         request_type: 'POST', request_by: 'butter' }}
+      let(:edited_response) {{ response_type: 'JSON', content: 'some json',         request_type: 'POST', request_by: 'butter', wait_time: 33 }}
       let(:success_edit)    { 'Response successfully edited' }
 
       it 'saves and displays the response with the edited details' do
@@ -85,7 +86,7 @@ describe 'Responses', type: :feature do
         fill_in_response_form_with response
 
         expect(page).to have_text success_create
-        expect(table_row_for('bread').text).to eq 'GET XML bread some fake xml Edit'
+        expect(table_row_for('bread').text).to eq 'GET XML bread 0 some fake xml Edit'
 
         within table_row_for('bread') do
           click_link 'Edit'
@@ -95,7 +96,7 @@ describe 'Responses', type: :feature do
         fill_in_response_form_with edited_response, 'Update'
         expect(page).to have_text success_edit
 
-        expect(table_row_for('butter').text).to eq 'POST JSON butter some json Edit'
+        expect(table_row_for('butter').text).to eq 'POST JSON butter 33 some json Edit'
       end
 
       it 'displays errors when removing content and request_by' do
@@ -123,6 +124,7 @@ describe 'Responses', type: :feature do
   def fill_in_response_form_with(response = {}, create_or_update = 'Create', save = true)
     fill_in 'Request by', with: response[:request_by]
     fill_in 'Content', with: response[:content]
+    fill_in 'Wait time', with: response[:wait_time]
 
     if response[:request_type]
       select response[:request_type], from: 'response_request_type'

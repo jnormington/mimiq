@@ -17,6 +17,10 @@
           <%= f.select :response_type, options_for_select(@response_types, @response.response_type) %>
         </div>
         <div class="form-spacer">
+          <div><%= f.label :wait_time %></div>
+          <%= f.number_field :wait_time %>
+        </div>
+        <div class="form-spacer">
           <div><%= f.label :content %></div>
           <%= f.text_area(:content, style: 'height: 350px;') %>
         </div>
