@@ -1,33 +1,90 @@
 ---
 
-# - name: 'Check pip is existing'
-
-# Check pip executable exists
-# Install dopy module
-# pip doesnt exist ask user to install and recommend if on osx either via
-#  - brew install pip (which install python)
-#  - or if python already installed then easy_install pip with sudo rights
-
-# Raise exception here if the user hasnt provided the extra vars over the command line
-
-# Once ssh-key created register that for use in the droplet creation
-
-# Check if the ssh key already exists if so then just use that one instead
 # ansible-playbook site.yml --extra-vars="DO_API_KEY=blah DO_CLIENT_ID=blue" -i hosts
 
-- name: 'Create local ssh private/public key'
+#
+# Digital Ocean API V1 can be found below for
+# - regions        - User input used
+# - droplet sizes  - User input used
+# - droplet images - 9801954="ubuntu-14-10-x64"
+# - TODO: Use ssh_key_ids= #TODO retrieve ssh keys from upload
+#
+# https://developers.digitalocean.com/documentation/v1/sizes/
+# https://developers.digitalocean.com/documentation/v1/regions/
+# https://developers.digitalocean.com/documentation/v1/images/
+
+- name: 'Pre-requisites'
   hosts: 127.0.0.1
+  vars:
+    do_host: https://api.digitalocean.com/v1
+    do_auth: "client_id={{DO_CLIENT_ID}}&api_key={{DO_API_KEY}}"
+    do_timeout: 180
+    sizes_download_file: /tmp/do_sizes_92fc4s3wquds.s
+    regions_download_file: /tmp/do_regions_43g5ft6yduis.r
   connection: local
   tasks:
-   - name: Create key
+   - name: Check pip installed
+     command: pip
+   - name: Install dopy module
+     pip: name=dopy state=present
+
+   - name: Check public key exists
+     shell: find ~/.ssh/mimiq_rsa.pub
+     ignore_errors: true
+     register: output
+   - name: Create public key
      shell: ssh-keygen -q -trsa -N '' -f ~/.ssh/mimiq_rsa
+     when: output.stderr != ''
    - name: Extract pub key contents
      shell: cat ~/.ssh/mimiq_rsa.pub
-     register: key
-   - digital_ocean_sshkey: >
-      state=present
-      name=mimiq_rsa_key
-      ssh_pub_key="{{key}}"
+     register: public_key
+   - name: Check public key extraction successful
+     fail: msg="Public key extraction failed"
+     when: public_key == ''
+   - name: Upload public key
+     digital_ocean_sshkey: >
+      state="present"
+      name="mimiq_rsa_key"
+      ssh_pub_key="{{public_key.stdout}}"
       client_id="{{DO_CLIENT_ID}}"
       api_key="{{DO_API_KEY}}"
 
+   - name: 'Download available droplet regions for user selection'
+     get_url: >
+      url="{{do_host}}/regions?{{do_auth}}"
+      dest="{{regions_download_file}}"
+   - name: Display regions to user
+     debug: "msg={{ lookup('file', regions_download_file) }}"
+   - pause: prompt="Please input a region id from the above output"
+     register: regions
+   - name: Check user input region
+     fail: "msg=Please ensure you select a region id next time"
+     when: regions.user_input == ''
+
+   - name: 'Download available droplet sizes for user selection'
+     get_url: >
+      url="{{do_host}}/sizes?{{do_auth}}"
+      dest="{{sizes_download_file}}"
+   - name: Display droplet sizes to user
+     debug: "msg={{ lookup('file', sizes_download_file) }}"
+   - pause: prompt="Please input a droplet size id from the above output"
+     register: sizes
+   - name: Check user input for droplet size
+     fail: "msg=Please ensure you select a size id next time"
+     when: sizes.user_input == ''
+
+   - name: Create Ubuntu base box
+     register: droplet
+     digital_ocean: >
+      name=mimiq-droplet
+      unique_name=true
+      size_id="{{sizes.user_input}}"
+      region_id="{{regions.user_input}}"
+      image_id="9801954"
+      client_id="{{DO_CLIENT_ID}}"
+      api_key="{{DO_API_KEY}}"
+      state=present
+      wait_timeout="{{do_timeout}}"
+
+   - name: Output new host to hosts file
+   - debug: msg="{{droplet.droplet.ip_address}}"
