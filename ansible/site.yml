@@ -21,6 +21,7 @@
     do_timeout: 180
     sizes_download_file: /tmp/do_sizes_92fc4s3wquds.s
     regions_download_file: /tmp/do_regions_43g5ft6yduis.r
+    current_working_dir: "{{ lookup('env','PWD') }}"
   connection: local
   tasks:
    - name: Check pip installed
@@ -42,12 +43,15 @@
      fail: msg="Public key extraction failed"
      when: public_key == ''
    - name: Upload public key
+     register: key_upload
      digital_ocean_sshkey: >
       state="present"
       name="mimiq_rsa_key"
       ssh_pub_key="{{public_key.stdout}}"
       client_id="{{DO_CLIENT_ID}}"
       api_key="{{DO_API_KEY}}"
+   - fail: msg="ssh public id from digital ocean was not successfull"
+     when: key_upload.ssh_key.id == ''
 
    - name: 'Download available droplet regions for user selection'
      get_url: >
@@ -80,11 +84,12 @@
       unique_name=true
       size_id="{{sizes.user_input}}"
       region_id="{{regions.user_input}}"
+      ssh_key_ids="{{key_upload.ssh_key.id}}"
       image_id="9801954"
       client_id="{{DO_CLIENT_ID}}"
       api_key="{{DO_API_KEY}}"
       state=present
       wait_timeout="{{do_timeout}}"
-
+   - debug: "msg={{droplet.droplet.ip_address}}"
    - name: Output new host to hosts file
-   - debug: msg="{{droplet.droplet.ip_address}}"
+     lineinfile: dest="{{current_working_dir}}/hosts" line="[server]\n{{droplet.droplet.ip_address}}"
