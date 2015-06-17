@@ -62,7 +62,7 @@
    - pause: prompt="Please input a region id from the above output"
      register: regions
    - name: Check user input region
-     fail: "msg=Please ensure you select a region id next time"
+     fail: msg="Please ensure you select a region id next time"
      when: regions.user_input == ''
 
    - name: 'Download available droplet sizes for user selection'
@@ -74,7 +74,7 @@
    - pause: prompt="Please input a droplet size id from the above output"
      register: sizes
    - name: Check user input for droplet size
-     fail: "msg=Please ensure you select a size id next time"
+     fail: msg="Please ensure you select a size id next time"
      when: sizes.user_input == ''
 
    - name: Create Ubuntu base box
