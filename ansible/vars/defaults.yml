@@ -1,0 +1,28 @@
+do_host: https://api.digitalocean.com/v1
+do_auth: "client_id={{DO_CLIENT_ID}}&api_key={{DO_API_KEY}}"
+do_timeout: 180
+
+sizes_download_file: /tmp/do_sizes_92fc4s3wquds.s
+regions_download_file: /tmp/do_regions_43g5ft6yduis.r
+
+current_working_dir: "{{ lookup('env','PWD') }}"
+
+passenger_oss_url: https://oss-binaries.phusionpassenger.com/apt/passenger
+passenger_distro_release: trusty
+passenger_ruby_location: /usr/local/rvm/wrappers/default
+nginx_sites_available_dir: /etc/nginx/sites-available
+nginx_sites_enabled_dir: /etc/nginx/sites-enabled
+branch_tag_version: master
+
+rails_app_root: /home/deploy/mimiq
+rails_env: production
+
+server_name: mimiq_droplet
+deploy_user: deploy
+rvm1_rvm_check_for_updates: false
+rvm1_install_path: '/usr/local/rvm'
+rvm1_rubies:
+ - ruby-2.2.2
+
+repo_url: git://github.com/jnormington/mimiq.git
+branch_tag_version: master
