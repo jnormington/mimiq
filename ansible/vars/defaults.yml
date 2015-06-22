@@ -10,9 +10,11 @@ current_working_dir: "{{ lookup('env','PWD') }}"
 passenger_oss_url: https://oss-binaries.phusionpassenger.com/apt/passenger
 passenger_distro_release: trusty
 passenger_ruby_location: /usr/local/rvm/wrappers/default
-nginx_sites_available_dir: /etc/nginx/sites-available
-nginx_sites_enabled_dir: /etc/nginx/sites-enabled
-branch_tag_version: master
+
+nginx_root_dir: /etc/nginx
+nginx_sites_available_dir: "{{ nginx_root_dir }}/sites-available"
+nginx_sites_enabled_dir:   "{{ nginx_root_dir }}/sites-enabled"
+
 
 rails_app_root: /home/deploy/mimiq
 rails_env: production

@@ -1,0 +1,66 @@
+---
+
+- name: Install dependencies
+  apt: >
+   name="{{item}}"
+  with_items:
+   - libcurl4-openssl-dev
+
+- name: Add pgp key
+  apt_key: >
+   url=http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x561F9B9CAC40B2F7
+   id=AC40B2F7
+   state=present
+
+- name: Ensure latest apt-https and ca-certs
+  apt: name="{{item}}"
+  with_items:
+   - apt-transport-https
+   - ca-certificates
+
+- name: Add repo
+  apt_repository: >
+   repo="deb https://oss-binaries.phusionpassenger.com/apt/passenger vivid main"
+   state=present
+   update_cache=yes
+
+- name: Install passenger and nginx
+  apt: name="{{item}}" state=present
+  with_items:
+   - passenger
+   - nginx-extras
+
+- name: Get passenger_root
+  shell: "passenger-config --root"
+  register: passenger_root
+
+- name: Check passenger root variable
+  fail: msg="Passenger root not successfully returned"
+  when: passenger_root == ''
+
+- name: Delete default sites-enabled link
+  file: >
+   dest={{ nginx_root_dir }}/sites-enabled/default
+   state=absent
+
+- name: Write nginx.conf file
+  template: >
+   src=nginx.conf.j2
+   dest="{{ nginx_root_dir }}/nginx.conf"
+   owner=root
+   mode=0644
+   backup=yes
+
+- name: Write a sites-available file
+  template: >
+   src=mimiq.site.j2
+   dest="{{ nginx_sites_available_dir }}/mimiq"
+   owner=root
+   mode=0644
+
+- name: Symlink into sites-enabled
+  file: >
+   src="{{ nginx_sites_available_dir }}/mimiq"
+   dest="{{ nginx_sites_enabled_dir }}/mimiq"
+   owner=root
+   state=link
