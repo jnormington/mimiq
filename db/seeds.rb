@@ -34,16 +34,12 @@ Card.find_or_create_by(title: 'Manage custom responses') do |card|
   card.link = "/responses"
 end
 
-Response.create!(
-  response_type: 'JSON',
-  content: "{blank: 'yes'}",
-  request_type: 'GET',
-  request_by: 'test'
-)
+Response.where(request_type: 'GET').find_or_create_by(request_by: 'test') do |res|
+  res.response_type = 'JSON'
+  res.content = "{blank: 'yes'}"
+end
 
-Response.create!(
-  response_type: '500',
-  content: 'never used but something required as /public/500.html used',
-  request_type: 'POST',
-  request_by: 'test'
-)
+Response.where(request_type: 'POST').find_or_create_by(request_by: 'test') do |res|
+  res.response_type = '500'
+  res.content = 'never used but something required as /public/500.html used'
+end
