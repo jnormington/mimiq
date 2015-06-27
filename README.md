@@ -4,13 +4,12 @@ As a QA Tester I am always testing with third party integration services such as
  - postcode services
  - analytic services
  - sms sending/receiving services
- - file/bucket storage mechanisms
 
-The problem is not all web applications rescue the common scenarios adequately or another 
+The problem is not all web applications rescue the common scenarios adequately or another
 layer in the application/webserver expires before hand - this app allows you to **mimic** these scenarios.
 
-This application trys to build certain path scenarios to test on applications that have 
-third party integrations - for which you can point your configuration url to this one for the AUT 
+This application trys to build certain path scenarios to test on applications that have
+third party integrations - for which you can point your configuration url to this one for the AUT
 (Application under Test) - as we can't ask third party services to provide these for testing
 
 
@@ -22,9 +21,44 @@ It tries to provide the following;
  - GET request - with different configurable responses
  - POST request - with different configurable responses
 
-### What is a configurable response
+##Deployment
 
- You can configure a response with the following attributes 
+### Playing locally
+ - Clone this repository
+ - Bundle install  `bundle`
+ - Run the webbrick rails server locally `rails s`
+
+### Digital ocean deployment
+ - Within this repository there is an ansible directory - this contains a playbook for
+  - creating/uploading ssh public key to digital ocean
+  - creating a ubuntu 15.04 droplet
+  - configuring the box (firewall/ruby/user/webserver)
+  - deploying the application
+
+####Steps
+ - Install ansible (>1.9) on your machine (osx use homebrew/ubuntu use apt etc) `brew install ansible`
+ - Install ansible requirements `ansible-galaxy install -f -r requirements.yml`
+ - Generate a token on digital ocean web for use on the ansible script
+ - Take note of the token and your client_api key
+ - Replace both <YOUR_API_TOKEN> and <YOUR_CLIENT_KEY> with the respective values below
+
+ - Create ssh public key and create droplet
+```sh
+ ssh-add ~/.ssh/mimiq_rsa && ansible-playbook site.yml --extra-vars="DO_API_KEY=<YOUR_API_TOKEN> DO_CLIENT_ID=<YOUR_CLIENT_KEY>" -i hosts --tags prereq
+```
+
+ - Configure the droplet and deploy application
+ - You will be asked two questions for the droplet size and droplet location please input the id of both (slugs don't work)
+
+```sh
+ ssh-add ~/.ssh/mimiq_rsa && ansible-playbook site.yml --extra-vars="DO_API_KEY=<YOUR_API_TOKEN> DO_CLIENT_ID=<YOUR_CLIENT_KEY>" -i hosts --tags python_setup,configure,deploy
+```
+
+- Once completed both visit the ip address in the hosts file in the ansible directory
+
+## What is a configurable response
+
+ You can configure a response with the following attributes
   - **request_by** - this makes the response unique by requesting this specific url
   - **response_type** (this allows the following responses)
   	- generic 404/500 (doesn't use content - just put hypen `-` in the content)
@@ -35,6 +69,14 @@ It tries to provide the following;
   - **content** (this is the content returned)
 
 ###Example
+ - When you create a response at `/responses/new` you are able to access that url in the following way.
+
+ 	- GET response `/scenario/get/<request_by>`
+ 	- POST response `/scenario/post/<request_by>`
+
+ - When hitting either url with the correct request (GET/POST) then you will receive the response setup. Below shows such example
+
+####GET request/response
  - When a response for *GET request* with the request_by set to *test* - then you can hit the application with the below url `http://localhost:3000/scenario/get/test` you get the content in the response, as below is shown.
 
 ```sh
@@ -55,9 +97,10 @@ Content-Length: 14
 Connection: Keep-Alive
 
 {blank: 'yes'}  <--- RESPONSE HERE
- 
+
 ```
 
+####POST request/response
 - When a response for *POST request* with the request_by set to a postcode *AA11CU* - then you can hit the application with the below url with a post request `http://localhost:3000/scenario/post/test` and you get the content in the response, as below is shown.
 
 As shown below the application doesn't care what is posted to the server be nothing to something it just responds based on your custom response you have built.
@@ -87,17 +130,3 @@ Saving to: 'STDOUT'
   </postcodes>
 </xml>
 ```
-
-
-
-###Who is it for
-
- Anyone that has to test these integrations. It will be most useful for QA Testers that 
- need to test 
-  - how the user is treated under certain scenarios 
-  - how the application handles delayed responses - which this app can help **mimic**
-  - testing scrapers for external parties that send files for validation
-
-###Whats it included
-  - Basic rails web application
-  - Ansible script for basic web server setup and deployment to digital ocean
