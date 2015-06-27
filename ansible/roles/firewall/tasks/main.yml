@@ -1,0 +1,10 @@
+---
+
+- name: Open default SSH port
+  ufw: rule=allow port=ssh proto=tcp
+
+- name: Open http port 80
+  ufw: rule=allow port=80 proto=tcp
+
+- name: enable_firewall
+  ufw: state=enabled logging=on

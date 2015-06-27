@@ -1,0 +1,49 @@
+---
+
+- name: Checkout lastest code branch
+  git: >
+   repo="{{ repo_url }}"
+   dest="{{ rails_app_root }}"
+   version="{{ branch_tag_version }}"
+   force=yes
+   accept_hostkey=yes
+
+- name: Bundle install
+  shell: "bundle chdir={{ rails_app_root }}"
+
+- name: Check if database exists
+  stat: path="{{ rails_app_root }}/db/mimiq.sqlite3"
+  register: db
+
+- name: Create database
+  shell: "RAILS_ENV={{ rails_env }} rake db:create chdir={{ rails_app_root }}"
+  when: not db.stat.exists
+
+- name: Migrate database
+  shell: "RAILS_ENV={{ rails_env }} rake db:migrate chdir={{ rails_app_root }}"
+
+- name: Seed database
+  shell: "RAILS_ENV={{ rails_env }} rake db:seed chdir={{ rails_app_root }}"
+
+- name: Clear public assets and tmp/cache/assets
+  shell: "rm -rf {{ item }}"
+  with_items:
+   - "{{ rails_app_root }}/tmp/cache/assets"
+   - "{{ rails_app_root }}/public/assets"
+  when: rails_app_root is defined and rails_app_root != ''
+
+- name: Precompile the assets
+  shell: "RAILS_ENV={{ rails_env }} rake assets:precompile chdir={{ rails_app_root }}"
+
+- name: Generate secret key
+  shell: "rake secret chdir={{ rails_app_root }}"
+  register: app_secret_key
+
+- name: Add secret key default envs
+  sudo: true
+  copy: >
+   dest="{{ rails_app_root }}/config/secrets.yml"
+   content="production:\n  secret_key_base: {{ app_secret_key.stdout }}"
+
+- service: name=nginx state=restarted
+  sudo: true

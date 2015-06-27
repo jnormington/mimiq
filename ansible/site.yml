@@ -1,0 +1,129 @@
+---
+
+# ansible-playbook site.yml --extra-vars="DO_API_KEY=blah DO_CLIENT_ID=blue" -i hosts
+# ansible-galaxy install -f -r requirements.yml
+- name: 'Pre-requisites'
+  hosts: 127.0.0.1
+  tags: prereq
+  vars_files:
+    - vars/defaults.yml
+  connection: local
+  tasks:
+   - name: Check pip installed
+     command: pip
+   - name: Install dopy module
+     pip: name=dopy state=present
+
+   - name: Check public key exists
+     shell: find ~/.ssh/mimiq_rsa.pub
+     ignore_errors: true
+     register: output
+
+   - name: Create public key
+     shell: ssh-keygen -q -trsa -N '' -f ~/.ssh/mimiq_rsa
+     when: output.stderr != ''
+
+   - name: Extract pub key contents
+     shell: cat ~/.ssh/mimiq_rsa.pub
+     register: public_key
+
+   - name: Check public key extraction successful
+     fail: msg="Public key extraction failed"
+     when: public_key == ''
+
+   - name: Upload public key
+     register: key_upload
+     digital_ocean_sshkey: >
+      state="present"
+      name="mimiq_rsa_key"
+      ssh_pub_key="{{public_key.stdout}}"
+      client_id="{{DO_CLIENT_ID}}"
+      api_key="{{DO_API_KEY}}"
+
+   - fail: msg="ssh public key id from digital ocean was not successfull"
+     when: key_upload.ssh_key.id == ''
+
+   - name: 'Download available droplet regions for user selection'
+     get_url: >
+      url="{{do_host}}/regions?{{do_auth}}"
+      dest="{{regions_download_file}}"
+
+   - name: Display regions to user
+     debug: "msg={{ lookup('file', regions_download_file) }}"
+
+   - pause: prompt="Please input a region id from the above output"
+     register: regions
+
+   - name: Check user input region
+     fail: msg="Please ensure you select a region id next time"
+     when: regions.user_input == ''
+
+   - name: 'Download available droplet sizes for user selection'
+     get_url: >
+      url="{{do_host}}/sizes?{{do_auth}}"
+      dest="{{sizes_download_file}}"
+
+   - name: Display droplet sizes to user
+     debug: "msg={{ lookup('file', sizes_download_file) }}"
+
+   - pause: prompt="Please input a droplet size id from the above output"
+     register: sizes
+
+   - name: Check user input for droplet size
+     fail: msg="Please ensure you select a size id next time"
+     when: sizes.user_input == ''
+
+   - name: Create Ubuntu 15.04 x64 box
+     register: droplet
+     digital_ocean: >
+      name=mimiq-droplet
+      unique_name=true
+      size_id="{{sizes.user_input}}"
+      region_id="{{regions.user_input}}"
+      ssh_key_ids="{{key_upload.ssh_key.id}}"
+      image_id="12285928"
+      client_id="{{DO_CLIENT_ID}}"
+      api_key="{{DO_API_KEY}}"
+      state=present
+      wait_timeout="{{do_timeout}}"
+
+   - debug: "msg={{droplet.droplet.ip_address}}"
+
+   - name: Output new host to hosts file
+     lineinfile: >
+      dest="{{current_working_dir}}/hosts"
+      line="[server]\n{{droplet.droplet.ip_address}}"
+      state=present
+
+- name: 'Configure droplet with python'
+  remote_user: root
+  gather_facts: false
+  tags: python_setup
+  hosts: server
+  tasks:
+   - name: Install python 2.7
+     raw: 'apt-get install -y python2.7'
+   - name: Symlink the python as default
+     raw: 'ln -s /usr/bin/python2.7 /usr/bin/python'
+
+- name: 'Configure the droplet'
+  tags: configure
+  remote_user: root
+  hosts: server
+  vars_files:
+    - vars/defaults.yml
+  roles:
+   - { role: dependency_packages }
+   - { role: firewall }
+   - { role: rvm_io.rvm1-ruby }
+   - { role: nginx_passenger }
+   - { role: user }
+
+- name: 'Deploy the application'
+  remote_user: "{{deploy_user}}"
+  tags: deploy
+  hosts: server
+  vars_files:
+    - vars/defaults.yml
+  roles:
+   - { role: deploy }

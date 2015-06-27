@@ -1,0 +1,19 @@
+- name: Create user account
+  user: name={{ deploy_user }} groups="rvm"
+
+  #lookup refused to see the file - need to investigate
+- command: "cat /root/.ssh/authorized_keys"
+  register: out
+
+- name: Copy authorized_keys from root directory
+  authorized_key: >
+   user={{ deploy_user }}
+   key="{{ out.stdout }}"
+
+- name: "Allow {{ deploy_user }} to sudo"
+  copy: >
+   content="%{{ deploy_user }} ALL=(ALL) NOPASSWD:ALL"
+   dest=/etc/sudoers.d/{{ deploy_user }}
+   owner=root
+   group=root
+   mode=0440
