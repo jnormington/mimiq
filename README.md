@@ -38,13 +38,14 @@ It tries to provide the following;
 ####Steps
  - Install ansible (>1.9) on your machine (osx use homebrew/ubuntu use apt etc) `brew install ansible`
  - Install ansible requirements `ansible-galaxy install -f -r requirements.yml`
- - Generate a token on digital ocean web for use on the ansible script
+ - Generate tokens on [digital ocean api v1](https://cloud.digitalocean.com/api_access)
  - Take note of the token and your client_api key
- - Replace both <YOUR_API_TOKEN> and <YOUR_CLIENT_KEY> with the respective values below
+ - Change directory to the `ansible` within the cloned application directory
+ - Replace both <YOUR_API_TOKEN> and <YOUR_CLIENT_KEY> with the respective values below.
 
  - Create ssh public key and create droplet
 ```sh
- ssh-add ~/.ssh/mimiq_rsa && ansible-playbook site.yml --extra-vars="DO_API_KEY=<YOUR_API_TOKEN> DO_CLIENT_ID=<YOUR_CLIENT_KEY>" -i hosts --tags prereq
+ ansible-playbook site.yml --extra-vars="DO_API_KEY=<YOUR_API_TOKEN> DO_CLIENT_ID=<YOUR_CLIENT_KEY>" -i hosts --tags prereq
 ```
 
  - Configure the droplet and deploy application
